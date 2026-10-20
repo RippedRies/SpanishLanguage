@@ -1,0 +1,678 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#c2410c">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Español">
+<link rel="apple-touch-icon" href="icon-180.png">
+<link rel="manifest" href="manifest.json">
+<title>Español</title>
+<style>
+  :root {
+    --bg: #faf7f2; --surface: #ffffff; --text: #1f1b16; --muted: #6b645b; --line: #e7e1d8;
+    --accent: #c2410c; --accent-text: #ffffff;
+    --again: #dc2626; --hard: #d97706; --good: #16a34a; --easy: #2563eb;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #17140f; --surface: #221e18; --text: #f3eee6; --muted: #a39b8f; --line: #3a342b;
+      --accent: #f97316; --accent-text: #1a0f05;
+    }
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; height: 100%; }
+  body {
+    background: var(--bg); color: var(--text);
+    font: 16px/1.4 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    -webkit-tap-highlight-color: transparent;
+    display: flex; flex-direction: column;
+    padding-top: env(safe-area-inset-top);
+  }
+  header {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 12px 16px; border-bottom: 1px solid var(--line);
+  }
+  header h1 { font-size: 20px; margin: 0; }
+  .badge { background: var(--accent); color: var(--accent-text); border-radius: 999px; padding: 2px 10px; font-size: 14px; font-weight: 600; }
+  main { flex: 1; overflow-y: auto; padding: 16px; max-width: 560px; width: 100%; margin: 0 auto; }
+  nav {
+    display: flex; border-top: 1px solid var(--line); background: var(--surface);
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+  nav button {
+    flex: 1; border: 0; background: none; color: var(--muted); padding: 12px 0 10px; font-size: 13px; font-weight: 600;
+  }
+  nav button .ico { display: block; font-size: 22px; line-height: 1.1; }
+  nav button.active { color: var(--accent); }
+  .view { display: none; }
+  .view.active { display: block; }
+
+  /* Review */
+  .row { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-bottom: 12px; }
+  .muted { color: var(--muted); font-size: 14px; }
+  .seg { display: inline-flex; border: 1px solid var(--line); border-radius: 8px; overflow: hidden; }
+  .seg button { border: 0; background: var(--surface); color: var(--muted); padding: 6px 10px; font-size: 13px; font-weight: 600; }
+  .seg button.on { background: var(--accent); color: var(--accent-text); }
+  .card {
+    background: var(--surface); border: 1px solid var(--line); border-radius: 16px;
+    min-height: 260px; padding: 24px; display: flex; flex-direction: column; align-items: center; justify-content: center;
+    text-align: center; cursor: pointer; user-select: none; position: relative;
+  }
+  .card .front { font-size: 34px; font-weight: 700; word-break: break-word; }
+  .card .back { margin-top: 16px; padding-top: 16px; border-top: 1px dashed var(--line); width: 100%; }
+  .card .back .answer { font-size: 24px; font-weight: 600; }
+  .card .back .note { margin-top: 8px; color: var(--muted); font-size: 15px; white-space: pre-wrap; }
+  .card .hint { position: absolute; bottom: 12px; color: var(--muted); font-size: 13px; }
+  .speak { position: absolute; top: 10px; right: 10px; border: 0; background: none; font-size: 22px; padding: 6px; cursor: pointer; }
+  .grades { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin-top: 12px; }
+  .grades button {
+    border: 0; border-radius: 12px; padding: 12px 4px; color: #fff; font-weight: 700; font-size: 15px;
+  }
+  .grades button small { display: block; font-weight: 500; opacity: .85; font-size: 12px; margin-top: 2px; }
+  .g-again { background: var(--again); } .g-hard { background: var(--hard); }
+  .g-good { background: var(--good); } .g-easy { background: var(--easy); }
+  .empty { text-align: center; padding: 48px 16px; }
+  .empty .big { font-size: 48px; }
+
+  /* Forms */
+  label { display: block; font-weight: 600; font-size: 14px; margin: 14px 0 6px; }
+  input, textarea, select {
+    width: 100%; font: inherit; font-size: 16px; /* 16px stops iOS zoom-on-focus */
+    padding: 10px 12px; border: 1px solid var(--line); border-radius: 10px; background: var(--surface); color: var(--text);
+  }
+  textarea { min-height: 70px; resize: vertical; }
+  .btn {
+    display: inline-block; border: 1px solid var(--line); background: var(--surface); color: var(--text);
+    border-radius: 10px; padding: 10px 14px; font: inherit; font-weight: 600; cursor: pointer;
+  }
+  .btn.primary { background: var(--accent); color: var(--accent-text); border-color: var(--accent); }
+  .btn.danger { color: var(--again); }
+  .btn.full { width: 100%; margin-top: 16px; padding: 14px; }
+  .btns { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 8px; }
+
+  /* Deck */
+  .list { list-style: none; margin: 12px 0 0; padding: 0; }
+  .list li {
+    display: flex; justify-content: space-between; align-items: center; gap: 8px;
+    padding: 12px; border: 1px solid var(--line); border-radius: 12px; background: var(--surface); margin-bottom: 8px; cursor: pointer;
+  }
+  .list .w { font-weight: 600; }
+  .list .m { color: var(--muted); font-size: 14px; }
+  .list .due { color: var(--muted); font-size: 13px; white-space: nowrap; text-align: right; }
+  .leech { background: var(--again); color: #fff; border-radius: 6px; padding: 1px 6px; font-size: 11px; font-weight: 700; margin-left: 6px; }
+  section.settings { margin-top: 28px; padding-top: 12px; border-top: 1px solid var(--line); }
+  section.settings h2 { font-size: 16px; margin: 0 0 4px; }
+
+  #toast {
+    position: fixed; left: 50%; bottom: calc(80px + env(safe-area-inset-bottom)); transform: translateX(-50%);
+    background: var(--text); color: var(--bg); padding: 10px 16px; border-radius: 10px; font-size: 14px;
+    opacity: 0; pointer-events: none; transition: opacity .2s; max-width: 90%;
+  }
+  #toast.show { opacity: 1; }
+</style>
+</head>
+<body>
+<header>
+  <h1>Español</h1>
+  <span class="badge" id="dueBadge">0 due</span>
+</header>
+
+<main>
+  <!-- Review -->
+  <div class="view active" id="view-review">
+    <div class="row">
+      <span class="muted" id="sessionInfo"></span>
+      <div class="seg" id="dirSeg">
+        <button data-dir="es-en">ES → EN</button>
+        <button data-dir="en-es">EN → ES</button>
+      </div>
+    </div>
+    <div id="reviewArea"></div>
+  </div>
+
+  <!-- Add / edit -->
+  <div class="view" id="view-add">
+    <h2 id="formTitle" style="margin:0">Add a word</h2>
+    <form id="wordForm" autocomplete="off">
+      <label for="fEs">Spanish</label>
+      <input id="fEs" required autocapitalize="none" spellcheck="false" lang="es" placeholder="la manzana">
+      <label for="fEn">English</label>
+      <input id="fEn" required autocapitalize="none" placeholder="apple">
+      <label for="fNote">Note (optional)</label>
+      <textarea id="fNote" placeholder="Example: Me como una manzana cada día."></textarea>
+      <button class="btn primary full" type="submit" id="saveBtn">Add word</button>
+      <div class="btns" id="editBtns" hidden>
+        <button class="btn" type="button" id="cancelEdit">Cancel</button>
+        <button class="btn" type="button" id="resetCard">Reset progress</button>
+        <button class="btn danger" type="button" id="deleteCard">Delete</button>
+      </div>
+    </form>
+  </div>
+
+  <!-- Deck -->
+  <div class="view" id="view-deck">
+    <input id="search" type="search" placeholder="Search words…">
+    <p class="muted" id="deckStats"></p>
+    <ul class="list" id="deckList"></ul>
+
+    <section class="settings">
+      <h2>Settings</h2>
+      <label for="newPerDay">New words per day</label>
+      <input id="newPerDay" type="number" min="1" max="100" inputmode="numeric">
+      <label>Backup</label>
+      <div class="btns">
+        <button class="btn" id="exportBtn">Export deck</button>
+        <button class="btn" id="importBtn">Import deck</button>
+        <input type="file" id="importFile" accept="application/json,.json" hidden>
+      </div>
+      <p class="muted" id="lastBackup"></p>
+      <label>Starter words</label>
+      <button class="btn" id="starterBtn">Add 50 common words</button>
+      <details style="margin-top:20px">
+        <summary class="muted">Testing: time travel</summary>
+        <p class="muted">Pretend it's a later day so you can check the spacing. <span id="offsetInfo"></span></p>
+        <div class="btns">
+          <button class="btn" id="tPlus">+1 day</button>
+          <button class="btn" id="tPlus7">+7 days</button>
+          <button class="btn" id="tReset">Back to today</button>
+        </div>
+      </details>
+    </section>
+  </div>
+</main>
+
+<nav>
+  <button data-view="review" class="active"><span class="ico">🃏</span>Review</button>
+  <button data-view="add"><span class="ico">➕</span>Add</button>
+  <button data-view="deck"><span class="ico">📚</span>Deck</button>
+</nav>
+<div id="toast"></div>
+
+<script>
+'use strict';
+const KEY = 'esflash.v1';
+const MIN = 60 * 1000, DAY = 24 * 60 * MIN;
+const MAX_INTERVAL = 365;
+const LEECH_AT = 4;
+const DEFAULT_SETTINGS = { dir: 'es-en', newPerDay: 15, dayOffset: 0, newLog: { day: '', count: 0 }, lastBackup: 0 };
+
+const STARTER = [
+  ['ser', 'to be (permanent traits)'], ['estar', 'to be (states, location)'], ['tener', 'to have'],
+  ['hacer', 'to do / to make'], ['ir', 'to go'], ['poder', 'to be able to, can'], ['decir', 'to say / to tell'],
+  ['ver', 'to see'], ['dar', 'to give'], ['saber', 'to know (facts)'], ['conocer', 'to know (people, places)'],
+  ['querer', 'to want / to love'], ['llegar', 'to arrive'], ['pasar', 'to pass / to happen'], ['poner', 'to put'],
+  ['creer', 'to believe'], ['hablar', 'to speak'], ['llevar', 'to carry / to wear'], ['dejar', 'to leave / to let'],
+  ['seguir', 'to follow / to continue'], ['encontrar', 'to find'], ['llamar', 'to call'], ['venir', 'to come'],
+  ['pensar', 'to think'], ['salir', 'to go out / to leave'], ['volver', 'to return'], ['tomar', 'to take / to drink'],
+  ['vivir', 'to live'], ['trabajar', 'to work'], ['comer', 'to eat'],
+  ['el tiempo', 'time / weather'], ['la casa', 'house / home'], ['el día', 'day'], ['el año', 'year'],
+  ['la vez', 'time (occurrence)', 'una vez = once; a veces = sometimes'], ['la gente', 'people', 'Singular in Spanish: la gente es…'],
+  ['el agua', 'water', 'Feminine, but takes "el": el agua fría'], ['la ciudad', 'city'], ['el trabajo', 'work / job'],
+  ['la mañana', 'morning', 'mañana (no article) = tomorrow'],
+  ['bueno', 'good'], ['grande', 'big / great'], ['nuevo', 'new'], ['pequeño', 'small'],
+  ['siempre', 'always'], ['nunca', 'never'], ['ahora', 'now'], ['también', 'also / too'],
+  ['todavía', 'still / yet'], ['ya', 'already']
+];
+
+// ---------- storage ----------
+function load() {
+  try {
+    const d = JSON.parse(localStorage.getItem(KEY));
+    if (d && Array.isArray(d.cards)) return { cards: d.cards, settings: { ...DEFAULT_SETTINGS, ...d.settings } };
+  } catch (e) { /* storage blocked or corrupt: start fresh */ }
+  return { cards: [], settings: { ...DEFAULT_SETTINGS } };
+}
+let db = load();
+function save() {
+  try { localStorage.setItem(KEY, JSON.stringify(db)); }
+  catch (e) { toast('Could not save: browser storage is unavailable'); }
+}
+if (navigator.storage && navigator.storage.persist) navigator.storage.persist().catch(() => {});
+
+// ---------- time ----------
+const now = () => Date.now() + db.settings.dayOffset * DAY;
+function startOfDay(t) { const d = new Date(t); d.setHours(0, 0, 0, 0); return d.getTime(); }
+function addDays(t, n) { const d = new Date(startOfDay(t)); d.setDate(d.getDate() + n); return d.getTime(); }
+function dayKey(t) { const d = new Date(t); return `${d.getFullYear()}-${d.getMonth() + 1}-${d.getDate()}`; }
+
+// ---------- SM-2 scheduling ----------
+// Returns an updated copy of the card. Pure apart from jitter.
+function schedule(card, grade, jitter = true) {
+  const c = { ...card };
+  const t = now();
+  if (grade === 'again') {
+    if (c.last) c.lapses++;           // a first-ever miss on a brand-new word isn't a lapse
+    c.ease = Math.max(1.3, c.ease - 0.2);
+    c.reps = 0;
+    c.interval = 0;
+    c.due = t + 10 * MIN;
+    c.last = t;
+    return c;
+  }
+  let iv;
+  if (c.reps === 0) {                  // learning ladder: 10 min -> 1 day -> 3 days
+    iv = grade === 'easy' ? 3 : 1;
+    if (grade === 'easy') c.reps++;     // easy skips the 3-day step
+  } else if (c.reps === 1) {
+    iv = { hard: 2, good: 3, easy: 5 }[grade];
+  } else {
+    const i = c.interval;
+    const hard = Math.max(i + 1, Math.round(i * 1.2));
+    const good = Math.max(hard + 1, Math.round(i * c.ease));
+    const easy = Math.max(good + 1, Math.round(i * c.ease * 1.3));
+    iv = { hard, good, easy }[grade];
+    if (jitter && iv >= 3) iv = Math.round(iv * (0.95 + Math.random() * 0.1));
+  }
+  if (grade === 'hard') c.ease = Math.max(1.3, c.ease - 0.15);
+  if (grade === 'easy') c.ease += 0.15;
+  c.reps++;
+  c.interval = Math.min(MAX_INTERVAL, iv);
+  c.due = addDays(t, c.interval);     // due from the start of that day
+  c.last = t;
+  return c;
+}
+
+function fmtInterval(card) {
+  const ms = card.due - now();
+  if (ms < DAY / 2 && card.interval === 0) return `${Math.max(1, Math.round(ms / MIN))}m`;
+  const d = card.interval;
+  if (d < 30) return `${d}d`;
+  if (d < 365) return `${Math.round(d / 30)}mo`;
+  return `${(d / 365).toFixed(1)}y`;
+}
+
+// ---------- cards ----------
+const norm = s => s.trim().toLowerCase().replace(/\s+/g, ' ');
+function newCard(es, en, note = '', source = 'manual') {
+  const t = now();
+  return {
+    id: Date.now().toString(36) + Math.random().toString(36).slice(2, 7),
+    es: es.trim(), en: en.trim(), note: note.trim(), source,
+    interval: 0, ease: 2.5, due: t, reps: 0, lapses: 0, created: t, last: 0
+  };
+}
+const findByEs = es => db.cards.find(c => norm(c.es) === norm(es));
+const isNew = c => !c.last;
+
+function newRemainingToday() {
+  const k = dayKey(now());
+  if (db.settings.newLog.day !== k) db.settings.newLog = { day: k, count: 0 };
+  return Math.max(0, db.settings.newPerDay - db.settings.newLog.count);
+}
+function dueCards() {
+  const t = now();
+  const reviews = db.cards.filter(c => !isNew(c) && c.due <= t).sort((a, b) => a.due - b.due);
+  const fresh = db.cards.filter(isNew).sort((a, b) => a.created - b.created).slice(0, newRemainingToday());
+  return reviews.concat(fresh);
+}
+
+// ---------- review session ----------
+let session = null; // { queue: [ids], current: id, flipped: bool, done: n }
+
+function startSession() {
+  session = { queue: dueCards().map(c => c.id), current: null, flipped: false, done: 0 };
+  nextCard();
+}
+function nextCard() {
+  session.current = session.queue.shift() || null;
+  session.flipped = false;
+  renderReview();
+}
+function grade(g) {
+  if (!session || !session.current || !session.flipped) return;
+  const idx = db.cards.findIndex(c => c.id === session.current);
+  if (idx < 0) return nextCard();
+  const before = db.cards[idx];
+  if (isNew(before)) db.settings.newLog.count++;
+  db.cards[idx] = schedule(before, g);
+  if (g === 'again') {
+    session.queue.splice(Math.min(3, session.queue.length), 0, before.id); // see it again in a few cards
+  } else {
+    session.done++;
+  }
+  save();
+  updateBadge();
+  nextCard();
+}
+
+function renderReview() {
+  const area = document.getElementById('reviewArea');
+  const info = document.getElementById('sessionInfo');
+  const card = session && session.current && db.cards.find(c => c.id === session.current);
+  if (!card) {
+    session && (session.current = null);
+    info.textContent = '';
+    area.innerHTML = '';
+    const box = el('div', 'empty');
+    if (!db.cards.length) {
+      box.innerHTML = '<div class="big">👋</div><p>Your deck is empty.</p>';
+      const b1 = el('button', 'btn primary', 'Add 50 common words');
+      b1.onclick = addStarter;
+      const b2 = el('button', 'btn', 'Add my own');
+      b2.onclick = () => show('add');
+      const bs = el('div', 'btns'); bs.style.justifyContent = 'center'; bs.append(b1, b2);
+      box.append(bs);
+    } else {
+      box.innerHTML = `<div class="big">🎉</div><p><strong>${session && session.done ? `¡Muy bien! ${session.done} reviewed.` : 'All caught up.'}</strong></p>`;
+      box.append(el('p', 'muted', nextDueText()));
+      const again = dueCards();
+      if (again.length) {
+        const b = el('button', 'btn primary', `Review ${again.length} more`);
+        b.onclick = startSession;
+        box.append(b);
+      }
+    }
+    area.append(box);
+    return;
+  }
+
+  const left = session.queue.length + 1;
+  info.textContent = `${left} left` + (isNew(card) ? ' · new word' : '');
+  const esFront = db.settings.dir === 'es-en';
+  const front = esFront ? card.es : card.en;
+  const back = esFront ? card.en : card.es;
+
+  area.innerHTML = '';
+  const c = el('div', 'card');
+  c.append(el('div', 'front', front));
+  if (esFront || session.flipped) {
+    const sp = el('button', 'speak', '🔊');
+    sp.title = 'Hear it';
+    sp.setAttribute('aria-label', 'Pronounce the Spanish word');
+    sp.onclick = e => { e.stopPropagation(); speak(card.es); };
+    c.append(sp);
+  }
+  if (session.flipped) {
+    const b = el('div', 'back');
+    b.append(el('div', 'answer', back));
+    if (card.note) b.append(el('div', 'note', card.note));
+    c.append(b);
+  } else {
+    c.append(el('div', 'hint', 'Tap to show answer'));
+  }
+  c.onclick = () => { if (!session.flipped) { session.flipped = true; renderReview(); } };
+  area.append(c);
+
+  if (session.flipped) {
+    const g = el('div', 'grades');
+    for (const [key, label] of [['again', 'Again'], ['hard', 'Hard'], ['good', 'Good'], ['easy', 'Easy']]) {
+      const b = el('button', 'g-' + key);
+      b.append(label, el('small', '', fmtInterval(schedule(card, key, false))));
+      b.onclick = () => grade(key);
+      g.append(b);
+    }
+    area.append(g);
+  }
+}
+
+function nextDueText() {
+  const t = now();
+  const upcoming = db.cards.filter(c => !isNew(c) && c.due > t).sort((a, b) => a.due - b.due)[0];
+  const waitingNew = db.cards.filter(isNew).length;
+  const parts = [];
+  if (upcoming) parts.push('Next review ' + whenText(upcoming.due) + '.');
+  if (waitingNew && !newRemainingToday()) parts.push(`${waitingNew} new word${waitingNew > 1 ? 's' : ''} waiting for tomorrow.`);
+  return parts.join(' ') || 'Add more words to keep learning.';
+}
+function whenText(due) {
+  const t = now();
+  const ms = due - t;
+  if (ms <= 0) return 'now';
+  if (ms < 60 * MIN) return `in ${Math.ceil(ms / MIN)} min`;
+  const days = Math.round((startOfDay(due) - startOfDay(t)) / DAY);
+  if (days <= 0) return 'later today';
+  if (days === 1) return 'tomorrow';
+  if (days < 30) return `in ${days} days`;
+  return new Date(due).toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
+}
+
+let esVoice = null;
+function pickVoice() {
+  const vs = speechSynthesis.getVoices();
+  esVoice = vs.find(v => v.lang === 'es-ES') || vs.find(v => v.lang && v.lang.startsWith('es')) || null;
+}
+if ('speechSynthesis' in window) { pickVoice(); speechSynthesis.onvoiceschanged = pickVoice; }
+function speak(text) {
+  if (!('speechSynthesis' in window)) return toast('Speech is not supported in this browser');
+  speechSynthesis.cancel();
+  const u = new SpeechSynthesisUtterance(text);
+  u.lang = 'es-ES';
+  if (esVoice) u.voice = esVoice;
+  u.rate = 0.9;
+  speechSynthesis.speak(u);
+}
+
+// ---------- add / edit ----------
+let editingId = null;
+const form = document.getElementById('wordForm');
+const fEs = document.getElementById('fEs'), fEn = document.getElementById('fEn'), fNote = document.getElementById('fNote');
+
+form.onsubmit = e => {
+  e.preventDefault();
+  const es = fEs.value, en = fEn.value, note = fNote.value;
+  if (!es.trim() || !en.trim()) return;
+  const dup = findByEs(es);
+  if (dup && dup.id !== editingId) {
+    return toast(`"${dup.es}" is already in your deck (${dup.en}). Edit it to add another meaning.`);
+  }
+  if (editingId) {
+    const c = db.cards.find(c => c.id === editingId);
+    if (c) Object.assign(c, { es: es.trim(), en: en.trim(), note: note.trim() });
+    save();
+    toast('Saved');
+    endEdit();
+    show('deck');
+  } else {
+    db.cards.push(newCard(es, en, note));
+    save();
+    toast(`Added "${es.trim()}"`);
+    form.reset();
+    fEs.focus();
+  }
+  updateBadge();
+};
+function startEdit(id) {
+  const c = db.cards.find(c => c.id === id);
+  if (!c) return;
+  editingId = id;
+  fEs.value = c.es; fEn.value = c.en; fNote.value = c.note || '';
+  document.getElementById('formTitle').textContent = 'Edit word';
+  document.getElementById('saveBtn').textContent = 'Save changes';
+  document.getElementById('editBtns').hidden = false;
+  show('add', true);
+}
+function endEdit() {
+  editingId = null;
+  form.reset();
+  document.getElementById('formTitle').textContent = 'Add a word';
+  document.getElementById('saveBtn').textContent = 'Add word';
+  document.getElementById('editBtns').hidden = true;
+}
+document.getElementById('cancelEdit').onclick = () => { endEdit(); show('deck'); };
+document.getElementById('deleteCard').onclick = () => {
+  const c = db.cards.find(c => c.id === editingId);
+  if (!c || !confirm(`Delete "${c.es}"?`)) return;
+  db.cards = db.cards.filter(x => x.id !== editingId);
+  save(); updateBadge(); endEdit(); show('deck');
+  toast('Deleted');
+};
+document.getElementById('resetCard').onclick = () => {
+  const i = db.cards.findIndex(c => c.id === editingId);
+  if (i < 0 || !confirm('Reset this word so it is studied as new?')) return;
+  const c = db.cards[i];
+  db.cards[i] = { ...newCard(c.es, c.en, c.note, c.source), id: c.id, created: c.created };
+  save(); updateBadge(); toast('Progress reset');
+};
+
+// ---------- deck ----------
+function renderDeck() {
+  const q = norm(document.getElementById('search').value);
+  const list = document.getElementById('deckList');
+  list.innerHTML = '';
+  const cards = db.cards
+    .filter(c => !q || norm(c.es).includes(q) || norm(c.en).includes(q))
+    .sort((a, b) => a.es.localeCompare(b.es, 'es'));
+  for (const c of cards) {
+    const li = el('li');
+    const left = el('div');
+    const w = el('div', 'w', c.es);
+    if (c.lapses >= LEECH_AT) {
+      const lb = el('span', 'leech', 'LEECH');
+      lb.title = `Missed ${c.lapses} times. Try adding a mnemonic or example sentence.`;
+      w.append(lb);
+    }
+    left.append(w, el('div', 'm', c.en));
+    const due = el('div', 'due', isNew(c) ? 'new' : whenText(c.due));
+    li.append(left, due);
+    li.onclick = () => startEdit(c.id);
+    list.append(li);
+  }
+  const total = db.cards.length;
+  const fresh = db.cards.filter(isNew).length;
+  const leeches = db.cards.filter(c => c.lapses >= LEECH_AT).length;
+  document.getElementById('deckStats').textContent = total
+    ? `${total} words · ${total - fresh} studied · ${fresh} new` + (leeches ? ` · ${leeches} leech${leeches > 1 ? 'es' : ''}` : '')
+    : 'No words yet.';
+  document.getElementById('newPerDay').value = db.settings.newPerDay;
+  document.getElementById('lastBackup').textContent = db.settings.lastBackup
+    ? 'Last export: ' + new Date(db.settings.lastBackup).toLocaleDateString()
+    : 'Not exported yet. Export now and then so a browser reset can’t wipe your progress.';
+  const off = db.settings.dayOffset;
+  document.getElementById('offsetInfo').textContent = off ? `Currently +${off} day${off > 1 ? 's' : ''}.` : '';
+  const hasStarter = db.cards.some(c => c.source === 'starter');
+  document.getElementById('starterBtn').disabled = hasStarter;
+  document.getElementById('starterBtn').textContent = hasStarter ? 'Starter words added' : 'Add 50 common words';
+}
+document.getElementById('search').oninput = renderDeck;
+document.getElementById('newPerDay').onchange = e => {
+  const n = Math.min(100, Math.max(1, parseInt(e.target.value, 10) || DEFAULT_SETTINGS.newPerDay));
+  db.settings.newPerDay = n;
+  save(); updateBadge(); renderDeck();
+};
+
+function addStarter() {
+  let added = 0;
+  for (const [es, en, note] of STARTER) {
+    if (findByEs(es)) continue;
+    db.cards.push(newCard(es, en, note || '', 'starter'));
+    added++;
+  }
+  save(); updateBadge();
+  toast(`Added ${added} words`);
+  if (current === 'review') startSession(); else renderDeck();
+}
+document.getElementById('starterBtn').onclick = addStarter;
+
+document.getElementById('exportBtn').onclick = () => {
+  db.settings.lastBackup = Date.now();
+  save();
+  const blob = new Blob([JSON.stringify({ app: 'espanol-flashcards', version: 1, exported: new Date().toISOString(), ...db }, null, 2)], { type: 'application/json' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = `espanol-backup-${new Date().toISOString().slice(0, 10)}.json`;
+  document.body.append(a); a.click(); a.remove();
+  setTimeout(() => URL.revokeObjectURL(a.href), 5000);
+  renderDeck();
+};
+document.getElementById('importBtn').onclick = () => document.getElementById('importFile').click();
+document.getElementById('importFile').onchange = async e => {
+  const file = e.target.files[0];
+  e.target.value = '';
+  if (!file) return;
+  try {
+    const d = JSON.parse(await file.text());
+    if (!d || !Array.isArray(d.cards) || d.cards.some(c => typeof c.es !== 'string' || typeof c.en !== 'string' || typeof c.due !== 'number')) {
+      throw new Error('bad format');
+    }
+    if (!confirm(`Replace your current deck (${db.cards.length} words) with this backup (${d.cards.length} words)?`)) return;
+    db = { cards: d.cards, settings: { ...DEFAULT_SETTINGS, ...d.settings, dayOffset: 0 } };
+    save(); updateBadge(); renderDeck(); session = null;
+    toast(`Imported ${d.cards.length} words`);
+  } catch (err) {
+    toast('That file is not a valid deck backup');
+  }
+};
+
+function shiftDays(n) {
+  db.settings.dayOffset = n === 0 ? 0 : db.settings.dayOffset + n;
+  save(); updateBadge(); renderDeck(); session = null;
+  toast(db.settings.dayOffset ? `Now pretending it's +${db.settings.dayOffset} days` : 'Back to today');
+}
+document.getElementById('tPlus').onclick = () => shiftDays(1);
+document.getElementById('tPlus7').onclick = () => shiftDays(7);
+document.getElementById('tReset').onclick = () => shiftDays(0);
+
+// ---------- shell ----------
+let current = 'review';
+function show(view, keepEdit = false) {
+  if (!keepEdit && view === 'add' && editingId) endEdit();
+  current = view;
+  document.querySelectorAll('.view').forEach(v => v.classList.toggle('active', v.id === 'view-' + view));
+  document.querySelectorAll('nav button').forEach(b => b.classList.toggle('active', b.dataset.view === view));
+  if (view === 'review' && (!session || !session.current)) startSession();
+  if (view === 'deck') renderDeck();
+  document.querySelector('main').scrollTop = 0;
+}
+document.querySelectorAll('nav button').forEach(b => b.onclick = () => show(b.dataset.view));
+
+function renderDir() {
+  document.querySelectorAll('#dirSeg button').forEach(b => b.classList.toggle('on', b.dataset.dir === db.settings.dir));
+}
+document.querySelectorAll('#dirSeg button').forEach(b => b.onclick = () => {
+  db.settings.dir = b.dataset.dir;
+  save(); renderDir();
+  if (session) { session.flipped = false; renderReview(); }
+});
+
+function updateBadge() {
+  const n = dueCards().length;
+  document.getElementById('dueBadge').textContent = `${n} due`;
+}
+
+function el(tag, cls, text) {
+  const e = document.createElement(tag);
+  if (cls) e.className = cls;
+  if (text != null) e.textContent = text;
+  return e;
+}
+let toastTimer;
+function toast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => t.classList.remove('show'), 2600);
+}
+
+// Desktop shortcuts: space flips, 1-4 grade.
+document.addEventListener('keydown', e => {
+  if (current !== 'review' || !session || !session.current || /INPUT|TEXTAREA/.test(e.target.tagName)) return;
+  if (e.key === ' ' || e.key === 'Enter') {
+    e.preventDefault();
+    if (!session.flipped) { session.flipped = true; renderReview(); }
+  } else if (session.flipped && '1234'.includes(e.key)) {
+    grade(['again', 'hard', 'good', 'easy'][+e.key - 1]);
+  }
+});
+
+// Refresh when the app comes back to the foreground on a new day.
+document.addEventListener('visibilitychange', () => {
+  if (document.visibilityState !== 'visible') return;
+  updateBadge();
+  if (current === 'review' && (!session || !session.current)) startSession();
+});
+
+renderDir();
+updateBadge();
+startSession();
+
+if ('serviceWorker' in navigator && (location.protocol === 'https:' || location.hostname === 'localhost')) {
+  navigator.serviceWorker.register('sw.js').catch(() => {});
+}
+</script>
+</body>
+</html>
